@@ -39,13 +39,13 @@ def process_song_data(spark, input_data, output_data):
     df = spark.read.json(song_data)
 
     # extract columns to create songs table
-    songs_table = df.select('song_id', 'title', 'artist_id','year', 'duration').dropDuplicates()
+    songs_table = df.select('song_id', 'title', 'artist_id','year', 'duration').dropDuplicates(subset=['song_id'])
     
     # write songs table to parquet files partitioned by year and artist
     songs_table.write.partitionBy('year', 'artist_id').parquet(os.path.join(output_data, 'songs/songs.parquet'), 'overwrite')
 
     # extract columns to create artists table
-    artists_table = df.select('artist_id', 'artist_name', 'artist_location','artist_latitude', 'artist_longitude').dropDuplicates()
+    artists_table = df.select('artist_id', 'artist_name', 'artist_location','artist_latitude', 'artist_longitude').dropDuplicates(subset=['artist_id'])
     
     # write artists table to parquet files
     artists_table.write.parquet(os.path.join(output_data, 'artists.parquet'), 'overwrite')
@@ -73,7 +73,7 @@ def process_log_data(spark, input_data, output_data):
     df = df.filter(df.page == 'NextSong')
 
     # extract columns for users table    
-    users_table = df.select('userId', 'firstName', 'lastName','gender', 'level').dropDuplicates()
+    users_table = df.select('userId', 'firstName', 'lastName','gender', 'level').dropDuplicates(subset=['userId'])
     
     # write users table to parquet files
     users_table.write.parquet(os.path.join(output_data, 'users/users.parquet'), 'overwrite')
@@ -105,7 +105,7 @@ def process_log_data(spark, input_data, output_data):
     song_df = spark.read.json(song_data)
 
     # extract columns from joined song and log datasets to create songplays table 
-    songplays_table = df.join(song_df, song_df.artist_name == df.artist, 'inner').dropDuplicates()\
+    songplays_table = df.join(song_df, [song_df.title == df.song ,song_df.artist_name == df.artist, song_df.duration == df.length], 'inner').dropDuplicates()\
     .select(   
         col('datetime').alias('start_time'),
         col('userId').alias('user_id'),
@@ -125,7 +125,7 @@ def process_log_data(spark, input_data, output_data):
 def main():
     spark = create_spark_session()
     input_data = "s3a://udacity-dend/"
-    output_data = "s3://aws-emr-resources-335899430782-us-east-1/notebooks/e-D8CHTGRTH2RWWV1AMZVQQSX5L/"
+    output_data = ""
     
     process_song_data(spark, input_data, output_data)    
     process_log_data(spark, input_data, output_data)
