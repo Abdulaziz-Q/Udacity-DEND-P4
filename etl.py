@@ -125,7 +125,7 @@ def process_log_data(spark, input_data, output_data):
 def main():
     spark = create_spark_session()
     input_data = "s3a://udacity-dend/"
-    output_data = "s3://aws-emr-resources-335899430782-us-east-1/notebooks/"
+    output_data = "s3a://abdulazizbucket/file/"
     
     process_song_data(spark, input_data, output_data)    
     process_log_data(spark, input_data, output_data)
