@@ -105,16 +105,18 @@ def process_log_data(spark, input_data, output_data):
     song_df = spark.read.json(song_data)
 
     # extract columns from joined song and log datasets to create songplays table 
-    songplays_table = df.join(song_df, [song_df.title == df.song ,song_df.artist_name == df.artist, song_df.duration == df.length], 'inner').dropDuplicates()\
+    songplays_table = df.join(song_df, [song_df.title == df.song ,song_df.artist_name == df.artist, song_df.duration == df.length]).dropDuplicates()\
     .select(   
         col('datetime').alias('start_time'),
         col('userId').alias('user_id'),
         col('level'),
         col('song_id'),
         col('artist_id'),
-        col('ssessionId').alias('session_id'),
+        col('sessionId').alias('session_id'),
         col('location'),
-        col('userAgent').alias('user_agent'))\
+        col('userAgent').alias('user_agent'),
+        col('year'),
+        month('datetime').alias('month'))\
     .withColumn('songplay_id', monotonically_increasing_id())
         
 
